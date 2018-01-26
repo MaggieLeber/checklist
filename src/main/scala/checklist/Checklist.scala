@@ -40,14 +40,16 @@ object Checklist {
       body(
         h1("C-177B Checklists"),
         div(
-          p("This is my first paragraph"),
-          for (c <- blobject.checklists) yield p(c.name)
-        )
-      )
-    )
+
+          for (cl <- blobject.checklists)
+            yield div(p(cl.name+":"+cl.subtype),
+              ul(
+              for (cli <- cl.checklistItems) yield li(s"${itemMap(cli).title} : ${itemMap(cli).action} (Type ${itemMap(cli).itemType})")
+              )
+    ))))
 
   def writeHtml = {
-    val pw =new java.io.PrintWriter("htmlChecklist")
+    val pw =new java.io.PrintWriter("htmlChecklist.html")
     pw.print(htmlChecklist.toString)
     pw.close
   }
