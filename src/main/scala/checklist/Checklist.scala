@@ -28,21 +28,27 @@ object Checklist {
   case class Binder(uuid:String,
                     name:String)
 
-  def htmlChecklist =
-    html(
-      head(script("some script")),
-      body(
-        h1("This is my title"),
-        div(
-          p("This is my first paragraph"),
-          p("This is my second paragraph")
-        )
-      )
-    )
-
   val parsedChecklist: JValue = parse(Source.fromResource("checklist.json").mkString)
 
   val blobject = parsedChecklist.extract[Blob]
 
   val itemMap = blobject.checklistItems map (t => t.uuid -> t) toMap
+
+  def htmlChecklist =
+    html(
+      head(script("")),
+      body(
+        h1("C-177B Checklists"),
+        div(
+          p("This is my first paragraph"),
+          for (c <- blobject.checklists) yield p(c.name)
+        )
+      )
+    )
+
+  def writeHtml = {
+    val pw =new java.io.PrintWriter("htmlChecklist")
+    pw.print(htmlChecklist.toString)
+    pw.close
+  }
 }
