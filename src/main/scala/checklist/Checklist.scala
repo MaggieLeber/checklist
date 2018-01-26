@@ -2,9 +2,7 @@ package checklist
 
 import org.json4s._
 import org.json4s.JsonDSL._
-// import org.json4s.scalap._
 import org.json4s.native.JsonMethods._
-
 import scala.io.Source
 import scalatags.Text.all._
 
