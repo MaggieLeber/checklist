@@ -7,6 +7,8 @@ import org.json4s.native.JsonMethods._
 import scala.io.Source
 import scalatags.Text.all._
 import scalatags.DataConverters._
+import checklist.Checklist._
+
 
 
 val blob = Checklist.mockChecklistBlob
@@ -15,5 +17,9 @@ checklists
 val firstCList = checklists.children.head
 case class Clist(uuid: String, name:String)
 val holyShit = firstCList.extract[Clist]
+
+val blobject = blob.extract[Checklist.Blob]
+blobject.checklists(0).checklistItems(0)
+
 holyShit.name
-html(body(p(())))
+html(body(p((holyShit.name))))

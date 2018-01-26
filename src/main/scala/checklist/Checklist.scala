@@ -18,6 +18,23 @@ object Checklist {
         )
       )
     )
+  case class Blob(binders:List[Binder],
+                  checklists:List[Checklist],
+                  checklistItems:List[Item],
+                  version:String)
+
+  case class Item(action:String,
+                  itemType:Int,
+                  title:String)
+
+  case class Checklist(uuid:String,
+                       checklistItems:List[String],
+                       name:String,
+                       subtype:Int)
+
+  case class Binder(uuid:String,
+                    name:String)
+
 
   val mockChecklistBlob =
 
@@ -87,7 +104,7 @@ object Checklist {
       )
     )
 
-  def parsedChecklist: JValue = {
+  val parsedChecklist: JValue = {
     parse(Source.fromResource("checklist.json").mkString)
   }
 }
