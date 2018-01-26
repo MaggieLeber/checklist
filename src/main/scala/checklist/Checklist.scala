@@ -6,7 +6,9 @@ import org.json4s.native.JsonMethods._
 import scala.io.Source
 import scalatags.Text.all._
 
+
 object Checklist {
+  implicit val formats = DefaultFormats
   def hellopage =
     html(
       head(script("some script")),
@@ -23,7 +25,8 @@ object Checklist {
                   checklistItems:List[Item],
                   version:String)
 
-  case class Item(action:String,
+  case class Item(uuid:String,
+                  action:String,
                   itemType:Int,
                   title:String)
 

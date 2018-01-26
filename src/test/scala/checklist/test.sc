@@ -20,6 +20,7 @@ val holyShit = firstCList.extract[Clist]
 
 val blobject = blob.extract[Checklist.Blob]
 blobject.checklists(0).checklistItems(0)
+parsedChecklist
 
 holyShit.name
 html(body(p((holyShit.name))))
