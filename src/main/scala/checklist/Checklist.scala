@@ -51,7 +51,7 @@ object Checklist extends App {
     for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter) )
       yield
         div(style:="border-style:solid; margin: 10px")(
-          p(style:="text-align: center; font-weight: bold;")(cl.name),
+          h4(style:="text-align: center")(cl.name),
           ul(for (cli <- cl.checklistItems) yield
           if (itemMap(cli).itemType == 11)
             p(s"${itemMap(cli).title} -- ${itemMap(cli).action}")
@@ -66,16 +66,16 @@ object Checklist extends App {
         h1("C-177B Checklists"),
         div(style:=" column-count: 2; -moz-column-count: 2; -webkit-column-count: 2;")
         (
-          h2("Normal"),
-          h3("Preflight"),
+          h2(style:="text-align: center;")("Normal Procedures"),
+          h3(style:="text-align: center;")("Preflight"),
           formatItems(preflight),
-          h3("Takeoff/cruise"),
+          h3(style:="text-align: center;")("Takeoff/cruise"),
           formatItems(cruise),
-          h3("Landing"),
+          h3(style:="text-align: center;")("Landing"),
           formatItems(landing),
-          h2("Abnormal"),
+          h2(style:="text-align: center;")("Abnormal Procedures"),
           formatItems(abnormal),
-          h2("Emergency"),
+          h2(style:="text-align: center;")("Emergency Procedures"),
           formatItems(emergency),
         )))
 
