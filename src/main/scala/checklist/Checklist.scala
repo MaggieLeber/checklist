@@ -7,13 +7,15 @@ import scala.io.Source
 import scalatags.Text.all._
 
 
-object Checklist {
+object Checklist extends App {
   implicit val formats = DefaultFormats
 
-  case class Blob(binders: List[Binder],
-                  checklists: List[Checklist],
+  case class Blob(
                   checklistItems: List[Item],
-                  version: String)
+                  checklists: List[Checklist],
+                  binders: List[Binder],
+                  version: String
+                 )
 
   case class Item(uuid: String,
                   action: String,
@@ -32,19 +34,23 @@ object Checklist {
     def abnormal(p: Checklist): Boolean = p.`type` == 1
     def emergency(p: Checklist): Boolean = p.`type` == 2
 
-  case class Binder(uuid: String,
-                    name: String)
+  case class Binder(
+                    checklists : List[String]
+                   )
 
   val parsedChecklist: JValue = parse(Source.fromResource("checklist.json").mkString)
 
   val blobject = parsedChecklist.extract[Blob]
 
   val itemMap = blobject.checklistItems map (t => t.uuid -> t) toMap
+  val checklistMap = blobject.checklists map (t => t.uuid -> t) toMap
+
+  val C177Checklists = blobject.binders.head.checklists
 
   def formatItems(filter: Checklist => Boolean) = {
-    for (cl <- blobject.checklists.filter(filter))
+    for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter) )
       yield
-        div(style:="border-style:solid; margin: 10px;")(
+        div(style:="border-style:solid; margin: 10px")(
           p(style:="text-align: center; font-weight: bold;")(cl.name),
           ul(for (cli <- cl.checklistItems) yield
           if (itemMap(cli).itemType == 11)
