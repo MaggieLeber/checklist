@@ -5,6 +5,7 @@ import org.json4s.JsonDSL._
 import org.json4s.native.JsonMethods._
 import scala.io.Source
 import scalatags.Text.all._
+import scalatags.stylesheet._
 
 
 object Checklist extends App {
@@ -50,7 +51,7 @@ object Checklist extends App {
   def formatItems(filter: Checklist => Boolean) = {
     for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter) )
       yield
-        div(style:="border-style:solid; margin: 10px")(
+        div(style:="border-style:solid; margin: 10px; column-break-inside:avoid; page-break-inside:avoid; ")(
           h4(style:="text-align: center")(cl.name),
           ul(for (cli <- cl.checklistItems) yield
           if (itemMap(cli).itemType == 11)
@@ -61,7 +62,7 @@ object Checklist extends App {
 
   def htmlChecklist =
     html(
-      head(script("")),
+      head(script(""),style:="@page {size:letter;}"),
       body(
         h1("C-177B Checklists"),
         div(style:=" column-count: 2; -moz-column-count: 2; -webkit-column-count: 2;")
