@@ -32,6 +32,7 @@ object Checklist extends App {
     def preflight(p: Checklist): Boolean = (p.subtype == 0) && (p.`type` == 0)
     def cruise(p: Checklist): Boolean = (p.subtype == 1) && (p.`type` == 0)
     def landing(p: Checklist): Boolean = (p.subtype == 2) && (p.`type` == 0)
+    def other(p: Checklist): Boolean = (p.subtype == 3) && (p.`type` == 0)
     def abnormal(p: Checklist): Boolean = p.`type` == 1
     def emergency(p: Checklist): Boolean = p.`type` == 2
 
@@ -74,6 +75,8 @@ object Checklist extends App {
           formatItems(cruise),
           h3(style:="text-align: center;")("Landing"),
           formatItems(landing),
+          h3(style:="text-align: center;")("Other"),
+          formatItems(other),
           h2(style:="text-align: center;")("Abnormal Procedures"),
           formatItems(abnormal),
           h2(style:="text-align: center;")("Emergency Procedures"),
