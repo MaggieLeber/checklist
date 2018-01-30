@@ -65,8 +65,9 @@ object Checklist extends App {
     html(
       head(script(""),style:="@page {size:letter;}"),
       body(
-        h1("C-177B Checklists"),
-        div(style:=" column-count: 2; -moz-column-count: 2; -webkit-column-count: 2;")
+        h1("C-177B N19762 Procedures"),
+        p(style:="font-size:-2;font-style:italic")("from Margaret Leber's Garmin Pilot account"),
+        div(style:="column-count:2;")
         (
           h2(style:="text-align: center;")("Normal Procedures"),
           h3(style:="text-align: center;")("Preflight"),
