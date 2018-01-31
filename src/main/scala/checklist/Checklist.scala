@@ -12,10 +12,10 @@ object Checklist extends App {
   implicit val formats = DefaultFormats
 
   case class Blob(
-                  checklistItems: List[Item],
-                  checklists: List[Checklist],
-                  binders: List[Binder],
-                  version: String
+                   checklistItems: List[Item],
+                   checklists: List[Checklist],
+                   binders: List[Binder],
+                   version: String
                  )
 
   case class Item(uuid: String,
@@ -29,59 +29,59 @@ object Checklist extends App {
                        `type`: Int,
                        subtype: Int)
 
-    def preflight(p: Checklist): Boolean = (p.subtype == 0) && (p.`type` == 0)
-    def cruise(p: Checklist): Boolean = (p.subtype == 1) && (p.`type` == 0)
-    def landing(p: Checklist): Boolean = (p.subtype == 2) && (p.`type` == 0)
-    def other(p: Checklist): Boolean = (p.subtype == 3) && (p.`type` == 0)
-    def abnormal(p: Checklist): Boolean = p.`type` == 1
-    def emergency(p: Checklist): Boolean = p.`type` == 2
+  def preflight(p: Checklist): Boolean = (p.subtype == 0) && (p.`type` == 0)
 
-  case class Binder(
-                    checklists : List[String]
-                   )
+  def cruise(p: Checklist): Boolean = (p.subtype == 1) && (p.`type` == 0)
+
+  def landing(p: Checklist): Boolean = (p.subtype == 2) && (p.`type` == 0)
+
+  def other(p: Checklist): Boolean = (p.subtype == 3) && (p.`type` == 0)
+
+  def abnormal(p: Checklist): Boolean = p.`type` == 1
+
+  def emergency(p: Checklist): Boolean = p.`type` == 2
+
+  case class Binder(checklists: List[String])
 
   val parsedChecklist: JValue = parse(Source.fromResource("checklist.json").mkString)
-
   val blobject = parsedChecklist.extract[Blob]
-
   val itemMap = blobject.checklistItems map (t => t.uuid -> t) toMap
   val checklistMap = blobject.checklists map (t => t.uuid -> t) toMap
-
   val C177Checklists = blobject.binders.head.checklists
 
+  def divMultiCol(multi : Boolean) =
+    if (multi) div(style := "border-style:solid; margin: 10px; column-break-inside:avoid; column-count:2;")
+    else div(style := "border-style:solid; margin: 10px; column-count:1; page-break-inside:avoid;")
+
   def formatItems(filter: Checklist => Boolean) = {
-    for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter) )
+    for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter))
       yield
-        div(style:="border-style:solid; margin: 10px; column-break-inside:avoid; page-break-inside:avoid; ")(
-          h4(style:="text-align: center")(cl.name),
-          ul(for (cli <- cl.checklistItems) yield
-          if (itemMap(cli).itemType == 11)
-            p(s"${itemMap(cli).title} -- ${itemMap(cli).action}")
-          else
-            li(s"${itemMap(cli).title} : ${itemMap(cli).action}")))
+       divMultiCol(cl.name == "Preflight Inspection")(
+          h4(style := "text-align: center")(cl.name),
+          ul(
+            for (cli <- cl.checklistItems) yield
+            if (itemMap(cli).itemType == 11)
+              p(s"${itemMap(cli).title} -- ${itemMap(cli).action}")
+            else
+              li(s"${itemMap(cli).title} : ${itemMap(cli).action}"))
+        )
   }
 
   def htmlChecklist =
     html(
-      head(script(""),style:="@page {size:letter;}"),
+      head(script(""), style := "@page {size:A5;}"),
       body(
         h1("C-177B N19762 Procedures"),
-        p(style:="font-size:-2;font-style:italic")("from Margaret Leber's Garmin Pilot account"),
-        div(style:="column-count:2;")
-        (
-          h2(style:="text-align: center;")("Normal Procedures"),
-          h3(style:="text-align: center;")("Preflight"),
-          formatItems(preflight),
-          h3(style:="text-align: center;")("Takeoff/cruise"),
-          formatItems(cruise),
-          h3(style:="text-align: center;")("Landing"),
-          formatItems(landing),
-          h3(style:="text-align: center;")("Other"),
-          formatItems(other),
-          h2(style:="text-align: center;")("Abnormal Procedures"),
-          formatItems(abnormal),
-          h2(style:="text-align: center;")("Emergency Procedures"),
-          formatItems(emergency),
+        p(style := "font-size:-2;font-style:italic")("from Margaret Leber's Garmin Pilot account"),
+        div(style := "column-count:1;")(
+          div(h2(style := "text-align: center;")("Normal Procedures"),
+            div(h3(style := "text-align: center;")("Preflight"),formatItems(preflight)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Takeoff/cruise"),formatItems(cruise)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Landing"),       formatItems(landing)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Other"),         formatItems(other))
+          ),
+          div(h2(style := "text-align: center;page-break-inside:avoid;")("Abnormal Procedures"),  formatItems(abnormal)),
+          div(h2(style := "text-align: center;page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItems(emergency))
         )))
 
   def writeHtml = {
