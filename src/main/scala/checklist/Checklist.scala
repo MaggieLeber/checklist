@@ -50,7 +50,7 @@ object Checklist extends App {
   val C177Checklists = blobject.binders.head.checklists
 
   def divMultiCol(multi : Boolean) =
-    if (multi) div(style := "border-style:solid; margin: 10px; column-break-inside:avoid; column-count:2;")
+    if (multi) div(style := "border-style:solid; margin: 10px; column-break-inside:avoid; column-count:2; page-break-inside:avoid;")
     else div(style := "border-style:solid; margin: 10px; column-count:1; page-break-inside:avoid;")
 
   def formatItems(filter: Checklist => Boolean) = {
@@ -69,19 +69,20 @@ object Checklist extends App {
 
   def htmlChecklist =
     html(
-      head(script(""), style := "@page {size:A5;}"),
+      // head(style := "@page :header {content : last(chapter)}", style :=  "H2 {running-head: chapter;}" ),
+      head(style := ""),
       body(
         h1("C-177B N19762 Procedures"),
         p(style := "font-size:-2;font-style:italic")("from Margaret Leber's Garmin Pilot account"),
         div(style := "column-count:1;")(
-          div(h2(style := "text-align: center;")("Normal Procedures"),
+          div(h2(style := "page-break-inside:avoid;")("Normal Procedures"),
             div(h3(style := "text-align: center;")("Preflight"),formatItems(preflight)),
             div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Takeoff/cruise"),formatItems(cruise)),
             div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Landing"),       formatItems(landing)),
             div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Other"),         formatItems(other))
           ),
-          div(h2(style := "text-align: center;page-break-inside:avoid;")("Abnormal Procedures"),  formatItems(abnormal)),
-          div(h2(style := "text-align: center;page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItems(emergency))
+          div(h2(style := "page-break-inside:avoid;")("Abnormal Procedures"),  formatItems(abnormal)),
+          div(h2(style := "page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItems(emergency))
         )))
 
   def writeHtml = {
