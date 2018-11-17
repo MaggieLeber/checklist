@@ -53,7 +53,7 @@ object Checklist extends App {
     if (multi) div(style := "border-style:solid; margin: 10px; column-break-inside:avoid; column-count:2; page-break-inside:avoid;")
     else div(style := "border-style:solid; margin: 10px; column-count:1; page-break-inside:avoid;")
 
-  def formatItems(filter: Checklist => Boolean) = {
+  def formatItemsHtml(filter: Checklist => Boolean) = {
     for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter))
       yield
        divMultiCol(cl.name == "Preflight Inspection")(
@@ -76,13 +76,13 @@ object Checklist extends App {
         p(style := "font-size:-2;font-style:italic")("from Margaret Leber's Garmin Pilot account"),
         div(style := "column-count:1;")(
           div(h2(style := "page-break-inside:avoid;")("Normal Procedures"),
-            div(h3(style := "text-align: center;")("Preflight"),formatItems(preflight)),
-            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Takeoff/cruise"),formatItems(cruise)),
-            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Landing"),       formatItems(landing)),
-            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Other"),         formatItems(other))
+            div(h3(style := "text-align: center;")("Preflight"),formatItemsHtml(preflight)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Takeoff/cruise"),formatItemsHtml(cruise)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Landing"),       formatItemsHtml(landing)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Other"),         formatItemsHtml(other))
           ),
-          div(h2(style := "page-break-inside:avoid;")("Abnormal Procedures"),  formatItems(abnormal)),
-          div(h2(style := "page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItems(emergency))
+          div(h2(style := "page-break-inside:avoid;")("Abnormal Procedures"),  formatItemsHtml(abnormal)),
+          div(h2(style := "page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItemsHtml(emergency))
         )))
 
   def writeHtml = {
@@ -91,10 +91,33 @@ object Checklist extends App {
     pw.close
   }
 
+
+  /**
+    *  ACE format:
+    *  magic number-revision-CRLF
+    *  checklistName CRLF
+    *  aircraftMakeAndModel-CRLF
+    *  aircraftInfo-CRLF (???)
+    *  manufacturerIdentification-CRLF
+    *  copyright-CRLF
+    *  <N ... > delimits group (N indent) first group and checklist are default display: emergency
+    *  (N ... ) delimits checklist (N indent)
+    *  wN introduces WARNING
+    *  aN introduces CAUTION
+    *  nN introduces NOTE
+    *  pN introduces plain text
+    *  rN introduces challenge-response; tilde [~] separates response from challenge
+    *  N can be 0,1,2,3,4 indent, C for centered
+   */
   def aceChecklist = {
     val magic = 0xf0f0f0f0
-    val aceVersion = 0x00010000
-    val
+    val revision = 0x00010000
+    val checklistName = ""
+    val checklistAircraftMakeAndModel = ""
+    val checklistAircraftInfo = ""
+    val checklistManufacturerIdentification = ""
+    val checklistCopyright = ""
+
 
   }
 
