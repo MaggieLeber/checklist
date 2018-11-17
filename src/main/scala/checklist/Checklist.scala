@@ -91,5 +91,12 @@ object Checklist extends App {
     pw.close
   }
 
+  def aceChecklist = {
+    val magic = 0xf0f0f0f0
+    val aceVersion = 0x00010000
+    val
+
+  }
+
   writeHtml
 }
