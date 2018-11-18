@@ -67,6 +67,16 @@ object Checklist extends App {
         )
   }
 
+  def formatItemsAce(filter: Checklist => Boolean) = {
+    for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter))
+      yield
+            for (cli <- cl.checklistItems) yield
+            if (itemMap(cli).itemType == 11)
+              s"r0${itemMap(cli).title}~${itemMap(cli).action}\n"
+            else
+              s"r0${itemMap(cli).title}~${itemMap(cli).action}\n"
+  }
+
   def htmlChecklist =
     html(
       // head(style := "@page :header {content : last(chapter)}", style :=  "H2 {running-head: chapter;}" ),
@@ -85,13 +95,6 @@ object Checklist extends App {
           div(h2(style := "page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItemsHtml(emergency))
         )))
 
-  def writeHtml = {
-    val pw = new java.io.PrintWriter("htmlChecklist.html")
-    pw.print(htmlChecklist.toString)
-    pw.close
-  }
-
-
   /**
     *  ACE format:
     *  magic number-revision-CRLF
@@ -108,7 +111,8 @@ object Checklist extends App {
     *  pN introduces plain text
     *  rN introduces challenge-response; tilde [~] separates response from challenge
     *  N can be 0,1,2,3,4 indent, C for centered
-   */
+    */
+
   def aceChecklist = {
     val magic = 0xf0f0f0f0
     val revision = 0x00010000
@@ -117,9 +121,20 @@ object Checklist extends App {
     val checklistAircraftInfo = ""
     val checklistManufacturerIdentification = ""
     val checklistCopyright = ""
-
+    println(formatItemsAce(emergency))
+    println(formatItemsAce(cruise))
+    println(formatItemsAce(landing))
+    println(formatItemsAce(other))
+    println(formatItemsAce(abnormal))
 
   }
 
+  def writeHtml = {
+    val pw = new java.io.PrintWriter("htmlChecklist.html")
+    pw.print(htmlChecklist.toString)
+    pw.close
+  }
+
   writeHtml
+  aceChecklist
 }
