@@ -1,4 +1,4 @@
-# checklist
+# checklist -- warning: personal toy program; not even alpha quality yet
 render Garmin Pilot checklists in two formats:
 
 * HTML suitable for printing
