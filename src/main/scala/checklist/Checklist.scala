@@ -67,14 +67,20 @@ object Checklist extends App {
         )
   }
 
-  def formatItemsAce(filter: Checklist => Boolean) = {
-    for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter))
-      yield
-            for (cli <- cl.checklistItems) yield
-            if (itemMap(cli).itemType == 11)
-              s"r0${itemMap(cli).title}~${itemMap(cli).action}\n"
-            else
-              s"r0${itemMap(cli).title}~${itemMap(cli).action}\n"
+ // def clDump(cl:Checklist) = {println(s"checklist ${cl.name} (${cl.`type`},${cl.subtype})\n");cl}
+
+  def formatListAce(filter: Checklist => Boolean) = {
+    C177Checklists.map(u => checklistMap(u)).filter(filter).map(cl=>s"(0${cl.name}\n" + formatItemsAce(cl.checklistItems).mkString("\n")+"\n)")
+  }
+
+  def formatItemsAce(items: List[String]) = {
+    items.map(
+      cli =>
+        if (itemMap(cli).itemType == 11)
+          s"n0${itemMap(cli).title}~${itemMap(cli).action}"
+        else
+          s"r0${itemMap(cli).title}~${itemMap(cli).action}"
+    )
   }
 
   def htmlChecklist =
@@ -121,11 +127,19 @@ object Checklist extends App {
     val checklistAircraftInfo = ""
     val checklistManufacturerIdentification = ""
     val checklistCopyright = ""
-    println(formatItemsAce(emergency))
-    println(formatItemsAce(cruise))
-    println(formatItemsAce(landing))
-    println(formatItemsAce(other))
-    println(formatItemsAce(abnormal))
+    print(magic)
+    println(revision)
+    println(checklistName)
+    println(checklistAircraftMakeAndModel)
+    println(checklistAircraftInfo)
+    println(checklistManufacturerIdentification)
+    println(checklistCopyright)
+    def aceGroup(label:String, in: String) = s"<0$label\n$in>\n"
+    println(aceGroup("Emergency",formatListAce(emergency).mkString("\n")))
+    println(aceGroup("Cruise",formatListAce(cruise).mkString("\n")))
+    println(aceGroup("Landing",formatListAce(landing).mkString("\n")))
+    println(aceGroup("Other",formatListAce(other).mkString("\n")))
+    println(aceGroup("Abnormal",formatListAce(abnormal).mkString("\n")))
 
   }
 
