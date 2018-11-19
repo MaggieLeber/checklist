@@ -6,10 +6,13 @@ import org.json4s.native.JsonMethods._
 import scala.io.Source
 import scalatags.Text.all._
 import scalatags.stylesheet._
+import java.util.zip.CRC32
+import scala.math.BigInt
 
 
 object Checklist extends App {
   implicit val formats = DefaultFormats
+  val CRLF = "\r\n"
 
   case class Blob(
                    checklistItems: List[Item],
@@ -103,6 +106,28 @@ object Checklist extends App {
     )
   }
 
+  def minimalChecklist:String = {
+  val magicAsString = "ננננ"
+  val revisionAsString = "\u0000\u0001\u0000\u0000"
+  val minimal =
+    magicAsString + revisionAsString + CRLF +
+      "GARMIN CHECKLIST PN XXX-XXXXX-XX" + CRLF +
+      "Aircraft Make and Model" + CRLF +
+      "Aircraft specific identification" + CRLF +
+      "Manufacturer Identification" + CRLF +
+      "Copyright Information" + CRLF +
+  "<0The group" + CRLF +
+    "(0The Checklist" + CRLF +
+    "c0The Entry" + CRLF +
+  ")" + CRLF +
+    ">" + CRLF +
+    "END" + CRLF
+
+    val crc = new CRC32
+    crc.update(minimal.getBytes())
+    return minimal + BigInt(crc.getValue).toByteArray.map(_.toChar).mkString("")
+  }
+
   /**
     *
     * ACE format:
@@ -132,9 +157,11 @@ object Checklist extends App {
     val aircraftInfo = "AircraftInfo"
     val manufacturerIdentification = "Cessna"
     val copyright = "no copyright just yet"
-    val CRLF = "\r\n"
+
 
     def aceGroup(label: String, in: String) = s"<0$label$CRLF$in$CRLF>$CRLF"
+
+
 
     val ace =
       magicAsString + revisionAsString + CRLF +
@@ -149,8 +176,7 @@ object Checklist extends App {
 //        aceGroup("Other", formatListAce(other).mkString(CRLF)) + CRLF +
         aceGroup("Abnormal", formatListAce(abnormal).mkString(CRLF)) + CRLF +
         "END" + CRLF
-    import java.util.zip.CRC32
-    import scala.math.BigInt
+
     val crc = new CRC32
     crc.update(ace.getBytes())
     return ace + BigInt(crc.getValue).toByteArray.map(_.toChar).mkString("")
@@ -168,6 +194,13 @@ object Checklist extends App {
     pw.close
   }
 
+  def writeMinimal = {
+    val pw = new java.io.PrintWriter("hackedminimal.ace")
+    pw.print(minimalChecklist)
+    pw.close
+  }
+
   writeHtml
   writeAce
+  writeMinimal
 }
