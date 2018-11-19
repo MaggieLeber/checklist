@@ -49,28 +49,48 @@ object Checklist extends App {
   val checklistMap = blobject.checklists map (t => t.uuid -> t) toMap
   val C177Checklists = blobject.binders.head.checklists
 
-  def divMultiCol(multi : Boolean) =
+  def divMultiCol(multi: Boolean) =
     if (multi) div(style := "border-style:solid; margin: 10px; column-break-inside:avoid; column-count:2; page-break-inside:avoid;")
     else div(style := "border-style:solid; margin: 10px; column-count:1; page-break-inside:avoid;")
 
   def formatItemsHtml(filter: Checklist => Boolean) = {
     for (cl <- C177Checklists.map(u => checklistMap(u)).filter(filter))
       yield
-       divMultiCol(cl.name == "Preflight Inspection")(
+        divMultiCol(cl.name == "Preflight Inspection")(
           h4(style := "text-align: center")(cl.name),
           ul(
             for (cli <- cl.checklistItems) yield
-            if (itemMap(cli).itemType == 11)
-              p(s"${itemMap(cli).title} -- ${itemMap(cli).action}")
-            else
-              li(s"${itemMap(cli).title} : ${itemMap(cli).action}"))
+              if (itemMap(cli).itemType == 11)
+                p(s"${itemMap(cli).title} -- ${itemMap(cli).action}")
+              else
+                li(s"${itemMap(cli).title} : ${itemMap(cli).action}"))
         )
   }
 
- // def clDump(cl:Checklist) = {println(s"checklist ${cl.name} (${cl.`type`},${cl.subtype})\n");cl}
+  def htmlChecklist =
+    html(
+      // head(style := "@page :header {content : last(chapter)}", style :=  "H2 {running-head: chapter;}" ),
+      head(style := ""),
+      body(
+        h1("C-177B N19762 Procedures"),
+        p(style := "font-size:-2;font-style:italic")("from Margaret Leber's Garmin Pilot account"),
+        div(style := "column-count:1;")(
+          div(h2(style := "page-break-inside:avoid;")("Normal Procedures"),
+            div(h3(style := "text-align: center;")("Preflight"), formatItemsHtml(preflight)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Takeoff/cruise"), formatItemsHtml(cruise)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Landing"), formatItemsHtml(landing)),
+            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Other"), formatItemsHtml(other))
+          ),
+          div(h2(style := "page-break-inside:avoid;")("Abnormal Procedures"), formatItemsHtml(abnormal)),
+          div(h2(style := "page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItemsHtml(emergency))
+        )))
+
+
+  // def clDump(cl:Checklist) = {println(s"checklist ${cl.name} (${cl.`type`},${cl.subtype})CRLF");cl}
 
   def formatListAce(filter: Checklist => Boolean) = {
-    C177Checklists.map(u => checklistMap(u)).filter(filter).map(cl=>s"(0${cl.name}\n" + formatItemsAce(cl.checklistItems).mkString("\n")+"\n)")
+    val CRLF = "\r\n"
+    C177Checklists.map(u => checklistMap(u)).filter(filter).map(cl => s"(0${cl.name}$CRLF" + formatItemsAce(cl.checklistItems).mkString(CRLF) + CRLF + ")")
   }
 
   def formatItemsAce(items: List[String]) = {
@@ -83,64 +103,57 @@ object Checklist extends App {
     )
   }
 
-  def htmlChecklist =
-    html(
-      // head(style := "@page :header {content : last(chapter)}", style :=  "H2 {running-head: chapter;}" ),
-      head(style := ""),
-      body(
-        h1("C-177B N19762 Procedures"),
-        p(style := "font-size:-2;font-style:italic")("from Margaret Leber's Garmin Pilot account"),
-        div(style := "column-count:1;")(
-          div(h2(style := "page-break-inside:avoid;")("Normal Procedures"),
-            div(h3(style := "text-align: center;")("Preflight"),formatItemsHtml(preflight)),
-            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Takeoff/cruise"),formatItemsHtml(cruise)),
-            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Landing"),       formatItemsHtml(landing)),
-            div(style := "page-break-inside:avoid;")(h3(style := "text-align: center;")("Other"),         formatItemsHtml(other))
-          ),
-          div(h2(style := "page-break-inside:avoid;")("Abnormal Procedures"),  formatItemsHtml(abnormal)),
-          div(h2(style := "page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItemsHtml(emergency))
-        )))
-
   /**
-    *  ACE format:
-    *  magic number-revision-CRLF
-    *  checklistName CRLF
-    *  aircraftMakeAndModel-CRLF
-    *  aircraftInfo-CRLF (???)
-    *  manufacturerIdentification-CRLF
-    *  copyright-CRLF
-    *  <N ... > delimits group (N indent) first group and checklist are default display: emergency
-    *  (N ... ) delimits checklist (N indent)
-    *  wN introduces WARNING
-    *  aN introduces CAUTION
-    *  nN introduces NOTE
-    *  pN introduces plain text
-    *  rN introduces challenge-response; tilde [~] separates response from challenge
-    *  N can be 0,1,2,3,4 indent, C for centered
+    *
+    * ACE format:
+    * magic number-revision-CRLF
+    * checklistName CRLF
+    * aircraftMakeAndModel-CRLF
+    * aircraftInfo-CRLF (???)
+    * manufacturerIdentification-CRLF
+    * copyright-CRLF
+    * <N ... > delimits group (N indent) first group and checklist are default display: emergency
+    * (N ... ) delimits checklist (N indent)
+    * wN introduces WARNING
+    * aN introduces CAUTION
+    * nN introduces NOTE
+    * pN introduces plain text
+    * rN introduces challenge-response; tilde [~] separates response from challenge
+    * N can be 0,1,2,3,4 indent, C for centered
     */
 
-  def aceChecklist = {
+  def aceChecklist: String = {
     val magic = 0xf0f0f0f0
+    val magicAsString = "ננננ"
     val revision = 0x00010000
-    val checklistName = ""
-    val checklistAircraftMakeAndModel = ""
-    val checklistAircraftInfo = ""
-    val checklistManufacturerIdentification = ""
-    val checklistCopyright = ""
-    print(magic)
-    println(revision)
-    println(checklistName)
-    println(checklistAircraftMakeAndModel)
-    println(checklistAircraftInfo)
-    println(checklistManufacturerIdentification)
-    println(checklistCopyright)
-    def aceGroup(label:String, in: String) = s"<0$label\n$in>\n"
-    println(aceGroup("Emergency",formatListAce(emergency).mkString("\n")))
-    println(aceGroup("Cruise",formatListAce(cruise).mkString("\n")))
-    println(aceGroup("Landing",formatListAce(landing).mkString("\n")))
-    println(aceGroup("Other",formatListAce(other).mkString("\n")))
-    println(aceGroup("Abnormal",formatListAce(abnormal).mkString("\n")))
+    val revisionAsString = "\u0000\u0001\u0000\u0000"
+    val name = "C177B Procedures"
+    val aircraftMakeAndModel = "Cessna C177B"
+    val aircraftInfo = "AircraftInfo"
+    val manufacturerIdentification = "Cessna"
+    val copyright = "no copyright just yet"
+    val CRLF = "\r\n"
 
+    def aceGroup(label: String, in: String) = s"<0$label$CRLF$in$CRLF>$CRLF"
+
+    val ace =
+      magicAsString + revisionAsString + CRLF +
+        name + CRLF +
+        aircraftMakeAndModel + CRLF +
+        aircraftInfo + CRLF +
+        manufacturerIdentification + CRLF +
+        copyright + CRLF +
+//        aceGroup("Emergency", formatListAce(emergency).mkString(CRLF)) + CRLF +
+//        aceGroup("Cruise", formatListAce(cruise).mkString(CRLF)) + CRLF +
+//        aceGroup("Landing", formatListAce(landing).mkString(CRLF)) + CRLF +
+//        aceGroup("Other", formatListAce(other).mkString(CRLF)) + CRLF +
+        aceGroup("Abnormal", formatListAce(abnormal).mkString(CRLF)) + CRLF +
+        "END" + CRLF
+    import java.util.zip.CRC32
+    import scala.math.BigInt
+    val crc = new CRC32
+    crc.update(ace.getBytes())
+    return ace + BigInt(crc.getValue).toByteArray.map(_.toChar).mkString("")
   }
 
   def writeHtml = {
@@ -149,6 +162,12 @@ object Checklist extends App {
     pw.close
   }
 
+  def writeAce = {
+    val pw = new java.io.PrintWriter("C177checklist.ace")
+    pw.print(aceChecklist)
+    pw.close
+  }
+
   writeHtml
-  aceChecklist
+  writeAce
 }
