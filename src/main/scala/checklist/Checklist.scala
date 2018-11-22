@@ -88,12 +88,56 @@ object Checklist extends App {
           div(h2(style := "page-break-inside:avoid; page-break-before:always;")("Emergency Procedures"), formatItemsHtml(emergency))
         )))
 
+  /**
+    * Garmin Aviation Checklist Editor  format:
+    * magic number-revision CRLF
+    * checklistName CRLF
+    * aircraftMakeAndModel CRLF
+    * aircraftInfo-CRLF (which is what????)
+    * manufacturerIdentification-CRLF
+    * copyright-CRLF
+    *
+    *  then the entries:
+    *
+    * <N ... > delimits group (N indent) first group and checklist are default display: emergency
+    * (N ... ) delimits checklist (N indent)
+    * wN introduces WARNING
+    * aN introduces CAUTION
+    * nN introduces NOTE
+    * pN introduces plain text
+    * rN introduces challenge-response; tilde [~] separates response from challenge
+    * N can be 0,1,2,3,4 indent, C for centered
+    *
+    */
+  def aceWrapper(checklist :String):String = {
+    val magicAsString = "\u00f0\u00f0\u00f0\u00f0"
+    val revisionAsString = "\u0000\u0001\u0000\u0000"
+    val withHeader =
+       magicAsString + revisionAsString + CRLF +
+      "GARMIN CHECKLIST PN XXX-XXXXX-XX" + CRLF +
+      "Aircraft Make and Model" + CRLF +
+      "Aircraft specific identification" + CRLF +
+      "Manufacturer Identification" + CRLF +
+      "Copyright Information" + CRLF +
+      checklist
+    val crc = new CRC32
+    crc.update(withHeader.getBytes())
+    val crcInts:Array[Int] = BigInt(crc.getValue).toByteArray.reverse.map( ~ _).map(_ & 0xff)
+    return withHeader +
+      crcInts(0).asInstanceOf[Char] +
+      crcInts(1).asInstanceOf[Char] +
+      crcInts(2).asInstanceOf[Char] +
+      crcInts(3).asInstanceOf[Char]
 
-  // def clDump(cl:Checklist) = {println(s"checklist ${cl.name} (${cl.`type`},${cl.subtype})CRLF");cl}
+  }
 
-  def formatListAce(filter: Checklist => Boolean) = {
-    val CRLF = "\r\n"
-    C177Checklists.map(u => checklistMap(u)).filter(filter).map(cl => s"(0${cl.name}$CRLF" + formatItemsAce(cl.checklistItems).mkString(CRLF) + CRLF + ")")
+  /**
+    * @return A very simple ACE checklist -- for testing
+    */
+  def minimalChecklist:String = {
+    val body= "<0The group" + CRLF + "(0The Checklist" + CRLF + "c0The Entry" + CRLF +
+      ")" + CRLF + ">" + CRLF + "END" + CRLF
+    aceWrapper(body)
   }
 
   def formatItemsAce(items: List[String]) = {
@@ -106,82 +150,23 @@ object Checklist extends App {
     )
   }
 
-  def minimalChecklist:String = {
-  val magicAsString = "\u00f0\u00f0\u00f0\u00f0"
-  val revisionAsString = "\u0000\u0001\u0000\u0000"
-  val minimal =
-    magicAsString + revisionAsString + CRLF +
-      "GARMIN CHECKLIST PN XXX-XXXXX-XX" + CRLF +
-      "Aircraft Make and Model" + CRLF +
-      "Aircraft specific identification" + CRLF +
-      "Manufacturer Identification" + CRLF +
-      "Copyright Information" + CRLF +
-  "<0The group" + CRLF +
-    "(0The Checklist" + CRLF +
-    "c0The Entry" + CRLF +
-  ")" + CRLF +
-    ">" + CRLF +
-    "END" + CRLF
-
-    val crc = new CRC32
-    crc.update(minimal.getBytes())
-    // BigInt(crc.getValue).toByteArray.reverse.map( ~ _).map(_ & 0xff).map(_.toHexString)
-    val crcInts:Array[Int] = BigInt(crc.getValue).toByteArray.reverse.map( ~ _).map(_ & 0xff)
-    return minimal + crcInts(0).asInstanceOf[Char] + crcInts(1).asInstanceOf[Char]+ crcInts(2).asInstanceOf[Char]+ crcInts(3).asInstanceOf[Char]
+  def formatListAce(filter: Checklist => Boolean) = {
+    C177Checklists.map(u => checklistMap(u))
+      .filter(filter)
+      .map(cl => s"(0${cl.name}$CRLF" + formatItemsAce(cl.checklistItems).mkString(CRLF) + CRLF + ")")
   }
 
-  /**
-    *
-    * ACE format:
-    * magic number-revision-CRLF
-    * checklistName CRLF
-    * aircraftMakeAndModel-CRLF
-    * aircraftInfo-CRLF (???)
-    * manufacturerIdentification-CRLF
-    * copyright-CRLF
-    * <N ... > delimits group (N indent) first group and checklist are default display: emergency
-    * (N ... ) delimits checklist (N indent)
-    * wN introduces WARNING
-    * aN introduces CAUTION
-    * nN introduces NOTE
-    * pN introduces plain text
-    * rN introduces challenge-response; tilde [~] separates response from challenge
-    * N can be 0,1,2,3,4 indent, C for centered
-    */
+  def aceGroup(label: String, in: String) = s"<0$label$CRLF$in$CRLF>$CRLF"
 
   def aceChecklist: String = {
-    val magicAsString = "\u00f0\u00f0\u00f0\u00f0"
-    val revisionAsString = "\u0000\u0001\u0000\u0000"
-    val name = "C177B Procedures"
-    val aircraftMakeAndModel = "Cessna C177B"
-    val aircraftInfo = "AircraftInfo"
-    val manufacturerIdentification = "Cessna"
-    val copyright = "no copyright just yet"
-
-
-    def aceGroup(label: String, in: String) = s"<0$label$CRLF$in$CRLF>$CRLF"
-
-
-
-    val ace =
-      magicAsString + revisionAsString + CRLF +
-        name + CRLF +
-        aircraftMakeAndModel + CRLF +
-        aircraftInfo + CRLF +
-        manufacturerIdentification + CRLF +
-        copyright + CRLF +
-        //       aceGroup("Emergency", formatListAce(emergency).mkString(CRLF)) + CRLF +
-//        aceGroup("Cruise", formatListAce(cruise).mkString(CRLF)) + CRLF +
-//        aceGroup("Landing", formatListAce(landing).mkString(CRLF)) + CRLF +
-//        aceGroup("Other", formatListAce(other).mkString(CRLF)) + CRLF +
-       aceGroup("Abnormal", formatListAce(abnormal).mkString(CRLF)) + CRLF +
-        "END" + CRLF
-
-    val crc = new CRC32
-    crc.update(ace.getBytes())
-    val crcInts:Array[Int] = BigInt(crc.getValue).toByteArray.reverse.map( ~ _).map(_ & 0xff)
-    return ace + crcInts(0).asInstanceOf[Char] + crcInts(1).asInstanceOf[Char]+ crcInts(2).asInstanceOf[Char]+ crcInts(3).asInstanceOf[Char]
-
+    aceWrapper(
+    //       aceGroup("Emergency", formatListAce(emergency).mkString(CRLF)) + CRLF +
+    //        aceGroup("Cruise", formatListAce(cruise).mkString(CRLF)) + CRLF +
+    //        aceGroup("Landing", formatListAce(landing).mkString(CRLF)) + CRLF +
+    //        aceGroup("Other", formatListAce(other).mkString(CRLF)) + CRLF +
+           aceGroup("Abnormal", formatListAce(abnormal).mkString(CRLF)) + CRLF +
+            "END" + CRLF
+    )
   }
 
   def writeHtml = {
@@ -204,5 +189,5 @@ object Checklist extends App {
 
   writeHtml
   writeAce
-//  writeMinimal
+  writeMinimal
 }
