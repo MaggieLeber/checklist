@@ -1,5 +1,8 @@
-# checklist -- warning: personal toy program; not even alpha quality yet
-render Garmin Pilot checklists in two formats:
+# checklist
+
+(warning: personal toy program; not even alpha quality yet)
+
+renders Garmin Pilot checklists in two formats:
 
 * HTML suitable for printing
 * [Garmin ACE format](https://www8.garmin.com/support/download_details.jsp?id=5075)
@@ -14,7 +17,7 @@ The input: go to FlyGarmin and grab a JSON payload off their checklist edit page
 ![](FlyGarminScreenshot.jpg)
 
 ## Garmin ACE format
-I'm reverse-engineering the undocumented ACE format. 
+I'm reverse-engineering the undocumented Garmin ACE format. See the source for details.
 
 
 ![](aceScreenshot.jpg)
