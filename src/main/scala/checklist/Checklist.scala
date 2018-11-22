@@ -133,10 +133,22 @@ object Checklist extends App {
 
   /**
     * @return A very simple ACE checklist -- for testing
+    *    this gets written to hackedminimal.ace and that should match
+    *    the minimal.ace exemplar created with Garmin's ACE program
     */
   def minimalChecklist:String = {
-    val body= "<0The group" + CRLF + "(0The Checklist" + CRLF + "c0The Entry" + CRLF +
-      ")" + CRLF + ">" + CRLF + "END" + CRLF
+    val body=
+      "<0The group"        + CRLF +
+      "(0The Checklist"    + CRLF +
+      "c0The Entry"        + CRLF +
+      ")"                  + CRLF +
+      ">"                  + CRLF +
+    "<0Another group"      + CRLF +
+    "(0Another Checklist"  + CRLF +
+    "c0Another Entry"      + CRLF +
+    ")"                    + CRLF +
+    ">"                    + CRLF + 
+    "END"                  + CRLF
     aceWrapper(body)
   }
 
@@ -160,12 +172,13 @@ object Checklist extends App {
 
   def aceChecklist: String = {
     aceWrapper(
-    //       aceGroup("Emergency", formatListAce(emergency).mkString(CRLF)) + CRLF +
-    //        aceGroup("Cruise", formatListAce(cruise).mkString(CRLF)) + CRLF +
-    //        aceGroup("Landing", formatListAce(landing).mkString(CRLF)) + CRLF +
-    //        aceGroup("Other", formatListAce(other).mkString(CRLF)) + CRLF +
-           aceGroup("Abnormal", formatListAce(abnormal).mkString(CRLF)) + CRLF +
-            "END" + CRLF
+           aceGroup("Emergency", formatListAce(emergency).mkString(CRLF)) +
+           aceGroup("Preflight", formatListAce(preflight).mkString(CRLF)) +
+           aceGroup("Cruise", formatListAce(cruise).mkString(CRLF)) +
+           aceGroup("Landing", formatListAce(landing).mkString(CRLF)) +
+           aceGroup("Other", formatListAce(other).mkString(CRLF)) +
+           aceGroup("Abnormal", formatListAce(abnormal).mkString(CRLF)) +
+           CRLF + "END" + CRLF
     )
   }
 
