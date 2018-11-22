@@ -10,6 +10,9 @@ http://json4s.org/
 
 http://www.lihaoyi.com/scalatags/#ScalaTags
 
+The input: go to FlyGarmin and grab a JSON payload off their checklist edit page:
+![](FlyGarminScreenshot.jpg)
+
 ## Garmin ACE format
 I'm reverse-engineering the undocumented ACE format. 
 
