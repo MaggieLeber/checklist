@@ -19,6 +19,9 @@ The input: go to FlyGarmin and grab a JSON payload off their checklist edit page
 ## Garmin ACE format
 I'm reverse-engineering the undocumented Garmin ACE format. See the source for details.
 
+Working in [_Reality XP GTN 750/650 Touch_](http://www.reality-xp.com) on  [XPlane 11](https://www.x-plane.com/)
+
+![](XplaneRealityXP750.jpg)
 
 ![](aceScreenshot.jpg)
 ![](aceProperties.JPG)
