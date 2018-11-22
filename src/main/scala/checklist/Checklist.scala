@@ -107,7 +107,7 @@ object Checklist extends App {
   }
 
   def minimalChecklist:String = {
-  val magicAsString = "ננננ"
+  val magicAsString = "\u00f0\u00f0\u00f0\u00f0"
   val revisionAsString = "\u0000\u0001\u0000\u0000"
   val minimal =
     magicAsString + revisionAsString + CRLF +
@@ -125,7 +125,9 @@ object Checklist extends App {
 
     val crc = new CRC32
     crc.update(minimal.getBytes())
-    return minimal + BigInt(crc.getValue).toByteArray.map(_.toChar).mkString("")
+    // BigInt(crc.getValue).toByteArray.reverse.map( ~ _).map(_ & 0xff).map(_.toHexString)
+    val crcInts:Array[Int] = BigInt(crc.getValue).toByteArray.reverse.map( ~ _).map(_ & 0xff)
+    return minimal + crcInts(0).asInstanceOf[Char] + crcInts(1).asInstanceOf[Char]+ crcInts(2).asInstanceOf[Char]+ crcInts(3).asInstanceOf[Char]
   }
 
   /**
@@ -148,9 +150,7 @@ object Checklist extends App {
     */
 
   def aceChecklist: String = {
-    val magic = 0xf0f0f0f0
-    val magicAsString = "ננננ"
-    val revision = 0x00010000
+    val magicAsString = "\u00f0\u00f0\u00f0\u00f0"
     val revisionAsString = "\u0000\u0001\u0000\u0000"
     val name = "C177B Procedures"
     val aircraftMakeAndModel = "Cessna C177B"
@@ -170,16 +170,18 @@ object Checklist extends App {
         aircraftInfo + CRLF +
         manufacturerIdentification + CRLF +
         copyright + CRLF +
-//        aceGroup("Emergency", formatListAce(emergency).mkString(CRLF)) + CRLF +
+        //       aceGroup("Emergency", formatListAce(emergency).mkString(CRLF)) + CRLF +
 //        aceGroup("Cruise", formatListAce(cruise).mkString(CRLF)) + CRLF +
 //        aceGroup("Landing", formatListAce(landing).mkString(CRLF)) + CRLF +
 //        aceGroup("Other", formatListAce(other).mkString(CRLF)) + CRLF +
-        aceGroup("Abnormal", formatListAce(abnormal).mkString(CRLF)) + CRLF +
+       aceGroup("Abnormal", formatListAce(abnormal).mkString(CRLF)) + CRLF +
         "END" + CRLF
 
     val crc = new CRC32
     crc.update(ace.getBytes())
-    return ace + BigInt(crc.getValue).toByteArray.map(_.toChar).mkString("")
+    val crcInts:Array[Int] = BigInt(crc.getValue).toByteArray.reverse.map( ~ _).map(_ & 0xff)
+    return ace + crcInts(0).asInstanceOf[Char] + crcInts(1).asInstanceOf[Char]+ crcInts(2).asInstanceOf[Char]+ crcInts(3).asInstanceOf[Char]
+
   }
 
   def writeHtml = {
@@ -202,5 +204,5 @@ object Checklist extends App {
 
   writeHtml
   writeAce
-  writeMinimal
+//  writeMinimal
 }
