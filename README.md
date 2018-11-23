@@ -13,8 +13,25 @@ http://json4s.org/
 
 http://www.lihaoyi.com/scalatags/#ScalaTags
 
-The input: go to FlyGarmin and grab a JSON payload off their checklist edit page:
+## Getting the input from FlyGarmin 
+
+Go to FlyGarmin and grab the JSON payload off your checklist edit page. 
+I currently use Chrome DevTools:  
+
+https://fly.garmin.com/fly-garmin/aircraft/N19762/checklist/
+
+Use your tail number of course...
+
 ![](FlyGarminScreenshot.jpg)
+
+Paste that into `src/main/resources/checklist.json` and run the program.
+This will write `
+* `htmlChecklist.html`
+* `C177checklist.ace` and
+* `hackedminimal.ace` (a test ACE exemplar)
+
+to the project directory.
+
 
 ## HTML format
 
