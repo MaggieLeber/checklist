@@ -1,6 +1,6 @@
 # checklist
 
-(warning: personal toy program; not even alpha quality yet)
+(warning: personal toy program; alpha quality)
 
 renders Garmin Pilot checklists in two formats:
 
