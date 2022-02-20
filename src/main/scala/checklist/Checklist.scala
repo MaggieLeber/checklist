@@ -3,9 +3,13 @@ package checklist
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.native.JsonMethods._
+
 import scala.io.Source
 import scalatags.Text.all._
 import scalatags.stylesheet._
+
+import java.io.FileOutputStream
+import java.nio.charset.Charset
 import java.util.zip.CRC32
 import scala.math.BigInt
 
@@ -121,7 +125,8 @@ object Checklist extends App {
       "Copyright Information" + CRLF +
       checklist
     val crc = new CRC32
-    crc.update(withHeader.getBytes())
+//    crc.update(withHeader.getBytes())
+    crc.update(withHeader.getBytes(Charset.forName("ISO-8859-1")))
     val crcInts:Array[Int] = BigInt(crc.getValue).toByteArray.reverse.map( ~ _).map(_ & 0xff)
     return withHeader +
       crcInts(0).asInstanceOf[Char] +
@@ -189,15 +194,15 @@ object Checklist extends App {
   }
 
   def writeAce = {
-    val pw = new java.io.PrintWriter("C177checklist.ace")
-    pw.print(aceChecklist)
-    pw.close
+    val fos = new FileOutputStream("C177checklist.ace")
+    aceChecklist.toStream.foreach(c=>fos.write(c.toByte))
+    fos.close
   }
 
   def writeMinimal = {
-    val pw = new java.io.PrintWriter("hackedminimal.ace")
-    pw.print(minimalChecklist)
-    pw.close
+    val fos = new FileOutputStream("hackedminimal.ace")
+    minimalChecklist.toStream.foreach(c=>fos.write(c.toByte))
+    fos.close
   }
 
   writeHtml
